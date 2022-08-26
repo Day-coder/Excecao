@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -31,11 +32,11 @@ public class ManipuladorErros {
 	public ResponseEntity<ErroPadrao> minhaExcecao(MinhaExcecao e, HttpServletRequest req){// esse método vai personaizar a exceção
 		ErroPadrao erro= new ErroPadrao();
 		erro.setTimestamp(Instant.now());
-		erro.setStatus(HttpStatus.NO_CONTENT.value());
+		erro.setStatus(HttpStatus.BAD_REQUEST.value());
 		erro.setError("Sem conteúdo");
 		erro.setMessage(e.getMessage());
 		erro.setPath(req.getRequestURI());
-		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(erro);
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(erro);
 	}
 	
 	@ExceptionHandler(EmailException.class)//pega a exceção lançada no service, o expetionHandler so pode ser anotada em métodos
@@ -48,4 +49,15 @@ public class ManipuladorErros {
 		erro.setPath(req.getRequestURI());
 		return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(erro);
 	}
+	
+	@ExceptionHandler(MethodArgumentNotValidException.class)//pega a exceção lançada no service, o expetionHandler so pode ser anotada em métodos
+	public ResponseEntity<ErroPadrao> entidadeNaoValidada(MethodArgumentNotValidException e, HttpServletRequest req){// esse método vai personaizar a exceção
+		ErroPadrao erro= new ErroPadrao();
+		erro.setTimestamp(Instant.now());
+		erro.setStatus(HttpStatus.BAD_REQUEST.value());
+		erro.setError("Recurso não encontrado");
+		erro.setMessage(e.getMessage());
+		erro.setPath(req.getRequestURI());
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(erro);
+}
 }
